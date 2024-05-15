@@ -400,7 +400,7 @@ function Unsteady_Land(inputs;topModel=nothing,topMesh=nothing,topEl=nothing,
                             aeroVals = aeroVals[1]
                             aeroDOFs = aeroDOFs[1]
                         else
-                            aeroVals,aeroDOFs = run_aero_with_deform(aero,deformAero,topMesh,topEl,topdata.u_j,topdata.uddot_j,inputs,numIterations,t[i],topdata.azi_j,topdata.Omega_j)
+                            aeroVals,aeroDOFs = run_aero_with_deform(aero,deformAero,topMesh,topEl,topdata.u_j,inputs,numIterations,t[i],topdata.azi_j,topdata.Omega_j)
                         end
                     end
                 end
@@ -605,9 +605,5 @@ function Unsteady_Land(inputs;topModel=nothing,topMesh=nothing,topEl=nothing,
     topdata.FReactionHist[1:i,:],topdata.FTwrBsHist[1:i,:],topdata.genTorque[1:i],topdata.genPower[1:i],topdata.torqueDriveShaft[1:i],topdata.uHist[1:i,:],
     topdata.uHist_prp[1:i,:],topdata.epsilon_x_hist[:,:,1:i],topdata.epsilon_y_hist[:,:,1:i],topdata.epsilon_z_hist[:,:,1:i],topdata.kappa_x_hist[:,:,1:i],
     topdata.kappa_y_hist[:,:,1:i],topdata.kappa_z_hist[:,:,1:i],topdata.FPtfmHist[1:i,:],topdata.FHydroHist[1:i,:],topdata.FMooringHist[1:i,:],
-    topdata.topFexternal_hist[1:i,:],topdata.rbDataHist[1:i,:],topdata.uddot_s[1:i,:]
-
-
-
-    
+    topdata.topFexternal_hist[1:i,:],topdata.rbDataHist[1:i,:]
 end

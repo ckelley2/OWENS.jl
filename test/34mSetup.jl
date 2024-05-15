@@ -393,7 +393,7 @@ function runowens(model,feamodel,mymesh,myel,aeroForcesDMS,deformTurb;steady=tru
     else
         println("here")
         println("running steady")
-
+        println("running steady CK WAS HERE!")
         feamodel.analysisType = "S"
 
         displ=zeros(mymesh.numNodes*6)

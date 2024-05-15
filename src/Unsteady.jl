@@ -934,7 +934,7 @@ function structuralDynamicsTransientGX(topModel,mesh,Fexternal,ForceDof,system,a
     return (strainGX,curvGX), dispOut, FReaction_j,systemout
 end
 
-function run_aero_with_deform(aero,deformAero,mesh,el,u_j,inputs,numIterations,t_i,azi_j,Omega_j)
+function run_aero_with_deform(aero,deformAero,mesh,el,u_j,uddot_j,inputs,numIterations,t_i,azi_j,Omega_j)
 
     if inputs.tocp_Vinf == -1
         newVinf = -1
@@ -978,6 +978,9 @@ function run_aero_with_deform(aero,deformAero,mesh,el,u_j,inputs,numIterations,t
         disp_x = [u_j[i] for i = 1:6:length(u_j)]
         disp_y = [u_j[i] for i = 2:6:length(u_j)]
         disp_z = [u_j[i] for i = 3:6:length(u_j)]
+        accel_x = [uddot_j[i] for i = 1:6:length(uddot_j)]
+        accel_y = [uddot_j[i] for i = 2:6:length(uddot_j)]
+        accel_z = [uddot_j[i] for i = 3:6:length(uddot_j)]
         disp_twist = [u_j_local[i] for i = 4:6:length(u_j_local)]
         # disp_twist2 = [u_j_local[i] for i = 5:6:length(u_j_local)]
         # disp_twist3 = [u_j_local[i] for i = 6:6:length(u_j_local)]
@@ -986,12 +989,18 @@ function run_aero_with_deform(aero,deformAero,mesh,el,u_j,inputs,numIterations,t
         bld_y = copy(mesh.structuralNodeNumbers[:,1:end-1]).*0.0
         bld_z = copy(mesh.structuralNodeNumbers[:,1:end-1]).*0.0
         bld_twist = copy(mesh.structuralNodeNumbers[:,1:end-1]).*0.0
+        bld_x_accel = copy(mesh.structuralNodeNumbers[:,1:end-1]).*0.0
+        bld_y_accel = copy(mesh.structuralNodeNumbers[:,1:end-1]).*0.0
+        bld_z_accel = copy(mesh.structuralNodeNumbers[:,1:end-1]).*0.0
 
         for jbld = 1:length(mesh.structuralNodeNumbers[:,1])
             bld_indices = Int.(mesh.structuralNodeNumbers[jbld,1:end-1])
             bld_x[jbld,:] = mesh.x[bld_indices]+disp_x[bld_indices]
             bld_y[jbld,:] = mesh.y[bld_indices]+disp_y[bld_indices]
             bld_z[jbld,:] = mesh.z[bld_indices]+disp_z[bld_indices]
+            bld_x_accel[jbld,:] = accel_x[bld_indices]
+            bld_y_accel[jbld,:] = accel_y[bld_indices]
+            bld_z_accel[jbld,:] = accel_z[bld_indices]
             # flatten blade x,y
             bld_x[jbld,:] = sqrt.(bld_x[jbld,:].^2 .+bld_y[jbld,:].^2) #TODO: a better way via the blade offset azimuth?
             bld_twist[jbld,:] = -disp_twist[bld_indices] #the bending displacements are in radians
@@ -1015,10 +1024,10 @@ function run_aero_with_deform(aero,deformAero,mesh,el,u_j,inputs,numIterations,t
     end
 
     # println("Calling Aero $(Omega_j*60) RPM $newVinf Vinf")
-    deformAero(azi_j;newOmega=Omega_j*2*pi,newVinf,bld_x,bld_z,bld_twist) #TODO: implement deformation induced velocities
+    deformAero(azi_j;newOmega=Omega_j*2*pi,newVinf,bld_x,bld_z,bld_twist,bld_x_accel,bld_y_accel,bld_z_accel) #TODO: implement deformation induced velocities
     aeroVals,aeroDOFs = aero(t_i,azi_j)
     # println(maximum(abs.(aeroVals)))
-    return aeroVals,aeroDOFs
+    return aeroVals,aeroDOFs,bld_x_accel,bld_y_accel,bld_z_accel
 end
 
 function run_aero_with_deformAD15(aero,deformAero,mesh,el,topdata,inputs,t_i)
